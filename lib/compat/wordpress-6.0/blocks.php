@@ -123,7 +123,15 @@ function gutenberg_build_query_vars_from_query_block( $block, $page ) {
 			$query['post_parent__in'] = array_filter( array_map( 'intval', $block->context['query']['parents'] ) );
 		}
 	}
-	return $query;
+
+	/**
+	 * Filters the WP_Query args array from the `Query` block properties.
+	 *
+	 * @param string[] $query WP_Query args array.
+	 * @param WP_Block $block Block instance.
+	 * @param int      $page  Current query's page.
+	 */
+	return apply_filters( 'query_block_query_args', $query, $block, $page );
 }
 
 if ( ! function_exists( 'build_comment_query_vars_from_block' ) ) {
