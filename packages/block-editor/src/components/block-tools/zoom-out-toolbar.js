@@ -147,7 +147,6 @@ export default function ZoomOutToolbar( { clientId, __unstableContentRef } ) {
 					label={ __( 'Delete' ) }
 					onClick={ () => {
 						removeBlock( clientId );
-						__unstableContentRef.current?.focus();
 					} }
 				/>
 			) }
