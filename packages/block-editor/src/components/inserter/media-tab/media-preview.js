@@ -26,7 +26,6 @@ import { moreVertical, external } from '@wordpress/icons';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { isBlobURL } from '@wordpress/blob';
-import { getFilename } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -168,13 +167,8 @@ export function MediaPreview( { media, onClick, category } ) {
 				.fetch( url )
 				.then( ( response ) => response.blob() )
 				.then( ( blob ) => {
-					const fileName = getFilename( url ) || 'image.jpg';
-					const file = new File( [ blob ], fileName, {
-						type: blob.type,
-					} );
-
 					settings.mediaUpload( {
-						filesList: [ file ],
+						filesList: [ blob ],
 						additionalData: { caption },
 						onFileChange( [ img ] ) {
 							if ( isBlobURL( img.url ) ) {
