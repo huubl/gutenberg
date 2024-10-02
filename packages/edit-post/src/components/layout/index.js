@@ -398,7 +398,7 @@ function Layout( {
 	const shouldIframe = useShouldIframe();
 	const { createErrorNotice } = useDispatch( noticesStore );
 	const {
-		currentPost: { postId: currentPostId, postType: currentPostType },
+		currentPost,
 		onNavigateToEntityRecord,
 		onNavigateToPreviousEntityRecord,
 	} = useNavigateToEntityRecord(
@@ -406,7 +406,6 @@ function Layout( {
 		initialPostType,
 		'post-only'
 	);
-	const isEditingTemplate = currentPostType === 'wp_template';
 	const {
 		mode,
 		isFullscreenActive,
@@ -416,6 +415,7 @@ function Layout( {
 		isDistractionFree,
 		showMetaBoxes,
 		hasHistory,
+		isEditingTemplate,
 		isWelcomeGuideVisible,
 		templateId,
 	} = useSelect(
@@ -428,7 +428,7 @@ function Layout( {
 
 			const supportsTemplateMode = settings.supportsTemplateMode;
 			const isViewable =
-				getPostType( currentPostType )?.viewable ?? false;
+				getPostType( currentPost.postType )?.viewable ?? false;
 			const canViewTemplate = canUser( 'read', {
 				kind: 'postType',
 				name: 'wp_template',
@@ -444,19 +444,21 @@ function Layout( {
 				showIconLabels: get( 'core', 'showIconLabels' ),
 				isDistractionFree: get( 'core', 'distractionFree' ),
 				showMetaBoxes:
-					! DESIGN_POST_TYPES.includes( currentPostType ) &&
 					select( editorStore ).getRenderingMode() === 'post-only',
+				isEditingTemplate:
+					select( editorStore ).getCurrentPostType() ===
+					'wp_template',
 				isWelcomeGuideVisible: isFeatureActive( 'welcomeGuide' ),
 				templateId:
 					supportsTemplateMode &&
 					isViewable &&
 					canViewTemplate &&
-					! isEditingTemplate
+					currentPost.postType !== 'wp_template'
 						? getEditedPostTemplateId()
 						: null,
 			};
 		},
-		[ currentPostType, isEditingTemplate, settings.supportsTemplateMode ]
+		[ settings.supportsTemplateMode, currentPost.postType ]
 	);
 
 	// Set the right context for the command palette
@@ -566,12 +568,12 @@ function Layout( {
 		<SlotFillProvider>
 			<ErrorBoundary>
 				<CommandMenu />
-				<WelcomeGuide postType={ currentPostType } />
+				<WelcomeGuide postType={ currentPost.postType } />
 				<Editor
 					settings={ editorSettings }
 					initialEdits={ initialEdits }
-					postType={ currentPostType }
-					postId={ currentPostId }
+					postType={ currentPost.postType }
+					postId={ currentPost.postId }
 					templateId={ templateId }
 					className={ className }
 					styles={ styles }
@@ -583,7 +585,7 @@ function Layout( {
 					autoFocus={ ! isWelcomeGuideVisible }
 					onActionPerformed={ onActionPerformed }
 					extraSidebarPanels={
-						showMetaBoxes && <MetaBoxes location="side" />
+						! isEditingTemplate && <MetaBoxes location="side" />
 					}
 					extraContent={
 						! isDistractionFree &&
