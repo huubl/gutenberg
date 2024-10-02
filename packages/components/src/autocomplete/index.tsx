@@ -72,9 +72,6 @@ const getNodeText = ( node: React.ReactNode ): string => {
 
 const EMPTY_FILTERED_OPTIONS: KeyedOption[] = [];
 
-// Used for generating the instance ID
-const AUTOCOMPLETE_HOOK_REFERENCE = {};
-
 export function useAutocomplete( {
 	record,
 	onChange,
@@ -82,7 +79,7 @@ export function useAutocomplete( {
 	completers,
 	contentRef,
 }: UseAutocompleteProps ) {
-	const instanceId = useInstanceId( AUTOCOMPLETE_HOOK_REFERENCE );
+	const instanceId = useInstanceId( useAutocomplete );
 	const [ selectedIndex, setSelectedIndex ] = useState( 0 );
 
 	const [ filteredOptions, setFilteredOptions ] = useState<

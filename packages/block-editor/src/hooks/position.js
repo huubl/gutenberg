@@ -310,9 +310,6 @@ export default {
 	},
 };
 
-// Used for generating the instance ID
-const POSITION_BLOCK_PROPS_REFERENCE = {};
-
 function useBlockProps( { name, style } ) {
 	const hasPositionBlockSupport = hasBlockSupport(
 		name,
@@ -321,7 +318,7 @@ function useBlockProps( { name, style } ) {
 	const isPositionDisabled = useIsPositionDisabled( { name } );
 	const allowPositionStyles = hasPositionBlockSupport && ! isPositionDisabled;
 
-	const id = useInstanceId( POSITION_BLOCK_PROPS_REFERENCE );
+	const id = useInstanceId( useBlockProps );
 
 	// Higher specificity to override defaults in editor UI.
 	const positionSelector = `.wp-container-${ id }.wp-container-${ id }`;
