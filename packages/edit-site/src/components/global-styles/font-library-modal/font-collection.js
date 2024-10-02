@@ -13,7 +13,9 @@ import {
 	__experimentalText as Text,
 	__experimentalHStack as HStack,
 	__experimentalVStack as VStack,
-	Navigator,
+	__experimentalNavigatorProvider as NavigatorProvider,
+	__experimentalNavigatorScreen as NavigatorScreen,
+	__experimentalNavigatorBackButton as NavigatorBackButton,
 	__experimentalHeading as Heading,
 	Notice,
 	SelectControl,
@@ -282,11 +284,11 @@ function FontCollection( { slug } ) {
 
 			{ ! isLoading && (
 				<>
-					<Navigator
+					<NavigatorProvider
 						initialPath="/"
 						className="font-library-modal__tabpanel-layout"
 					>
-						<Navigator.Screen path="/">
+						<NavigatorScreen path="/">
 							<HStack justify="space-between">
 								<VStack>
 									<Heading level={ 2 } size={ 13 }>
@@ -376,11 +378,11 @@ function FontCollection( { slug } ) {
 								</ul>
 								{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
 							</div>
-						</Navigator.Screen>
+						</NavigatorScreen>
 
-						<Navigator.Screen path="/fontFamily">
+						<NavigatorScreen path="/fontFamily">
 							<Flex justify="flex-start">
-								<Navigator.BackButton
+								<NavigatorBackButton
 									icon={
 										isRTL() ? chevronRight : chevronLeft
 									}
@@ -461,8 +463,8 @@ function FontCollection( { slug } ) {
 								{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
 							</VStack>
 							<Spacer margin={ 16 } />
-						</Navigator.Screen>
-					</Navigator>
+						</NavigatorScreen>
+					</NavigatorProvider>
 
 					{ selectedFont && (
 						<Flex

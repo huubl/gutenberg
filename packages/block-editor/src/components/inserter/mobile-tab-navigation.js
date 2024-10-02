@@ -10,7 +10,10 @@ import {
 	__experimentalSpacer as Spacer,
 	__experimentalHeading as Heading,
 	__experimentalView as View,
-	Navigator,
+	__experimentalNavigatorProvider as NavigatorProvider,
+	__experimentalNavigatorScreen as NavigatorScreen,
+	__experimentalNavigatorButton as NavigatorButton,
+	__experimentalNavigatorBackButton as NavigatorBackButton,
 	FlexBlock,
 } from '@wordpress/components';
 import { Icon, chevronRight, chevronLeft } from '@wordpress/icons';
@@ -21,7 +24,7 @@ function ScreenHeader( { title } ) {
 			<View>
 				<Spacer marginBottom={ 0 } paddingX={ 4 } paddingY={ 3 }>
 					<HStack spacing={ 2 }>
-						<Navigator.BackButton
+						<NavigatorBackButton
 							style={
 								// TODO: This style override is also used in ToolsPanelHeader.
 								// It should be supported out-of-the-box by Button.
@@ -43,14 +46,14 @@ function ScreenHeader( { title } ) {
 
 export default function MobileTabNavigation( { categories, children } ) {
 	return (
-		<Navigator
+		<NavigatorProvider
 			initialPath="/"
 			className="block-editor-inserter__mobile-tab-navigation"
 		>
-			<Navigator.Screen path="/">
+			<NavigatorScreen path="/">
 				<ItemGroup>
 					{ categories.map( ( category ) => (
-						<Navigator.Button
+						<NavigatorButton
 							key={ category.name }
 							path={ `/category/${ category.name }` }
 							as={ Item }
@@ -64,19 +67,19 @@ export default function MobileTabNavigation( { categories, children } ) {
 									}
 								/>
 							</HStack>
-						</Navigator.Button>
+						</NavigatorButton>
 					) ) }
 				</ItemGroup>
-			</Navigator.Screen>
+			</NavigatorScreen>
 			{ categories.map( ( category ) => (
-				<Navigator.Screen
+				<NavigatorScreen
 					key={ category.name }
 					path={ `/category/${ category.name }` }
 				>
 					<ScreenHeader title={ __( 'Back' ) } />
 					{ children( category ) }
-				</Navigator.Screen>
+				</NavigatorScreen>
 			) ) }
-		</Navigator>
+		</NavigatorProvider>
 	);
 }

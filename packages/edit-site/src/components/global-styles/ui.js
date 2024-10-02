@@ -2,8 +2,9 @@
  * WordPress dependencies
  */
 import {
-	Navigator,
-	useNavigator,
+	__experimentalNavigatorProvider as NavigatorProvider,
+	__experimentalNavigatorScreen as NavigatorScreen,
+	__experimentalUseNavigator as useNavigator,
 	createSlotFill,
 	DropdownMenu,
 	MenuGroup,
@@ -123,7 +124,7 @@ function GlobalStylesActionMenu() {
 
 function GlobalStylesNavigationScreen( { className, ...props } ) {
 	return (
-		<Navigator.Screen
+		<NavigatorScreen
 			className={ [
 				'edit-site-global-styles-sidebar__navigator-screen',
 				className,
@@ -282,7 +283,7 @@ function GlobalStylesUI() {
 		[]
 	);
 	return (
-		<Navigator
+		<NavigatorProvider
 			className="edit-site-global-styles-sidebar__navigator-provider"
 			initialPath="/"
 		>
@@ -384,7 +385,7 @@ function GlobalStylesUI() {
 			<GlobalStylesActionMenu />
 			<GlobalStylesBlockLink />
 			<GlobalStylesEditorCanvasContainerLink />
-		</Navigator>
+		</NavigatorProvider>
 	);
 }
 export { GlobalStylesMenuSlot };

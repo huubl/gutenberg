@@ -6,7 +6,7 @@ import {
 	FlexBlock,
 	Flex,
 	Button,
-	useNavigator,
+	__experimentalUseNavigator as useNavigator,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { styles, seen, backup } from '@wordpress/icons';
