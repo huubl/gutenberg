@@ -82,7 +82,8 @@ export default function InitPatternModal() {
 							/>
 							<HStack justify="right">
 								<Button
-									__next40pxDefaultSize
+									// TODO: Switch to `true` (40px size) if possible
+									__next40pxDefaultSize={ false }
 									variant="primary"
 									type="submit"
 									disabled={ ! title }
