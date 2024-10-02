@@ -67,7 +67,7 @@ function FontLibraryModal( {
 			className="font-library-modal"
 		>
 			<Tabs defaultTabId={ defaultTabId }>
-				<div className="font-library-modal__tablist-container">
+				<div className="font-library-modal__tablist">
 					<Tabs.TabList>
 						{ tabs.map( ( { id, title } ) => (
 							<Tabs.Tab key={ id } tabId={ id }>
