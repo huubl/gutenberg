@@ -70,8 +70,6 @@ The children elements.
 
 #### `Navigator.Screen`
 
-##### Props
-
 ###### `path`: `string`
 
 The screen's path, matched against the current path stored in the navigator.
@@ -96,9 +94,7 @@ The children elements.
 
 -   Required: Yes
 
-#### `Navigator.Button`
-
-##### Props
+##### `Navigator.Button`
 
 ###### `path`: `string`
 
@@ -123,9 +119,7 @@ The children elements.
 
 `Navigator.Button` also inherits all of the [`Button` props](/packages/components/src/button/README.md#props), except for `href` and `target`.
 
-#### `Navigator.BackButton`
-
-##### Props
+##### `Navigator.BackButton`
 
 ###### `children`: `string`
 
@@ -137,11 +131,9 @@ The children elements.
 
 `Navigator.BackButton` also inherits all of the [`Button` props](/packages/components/src/button/README.md#props), except for `href` and `target`.
 
-#### `useNavigator`
+###### `useNavigator`
 
 You can retrieve a `navigator` instance by using the `useNavigator` hook.
-
-##### Props
 
 The `navigator` instance has a few properties:
 
