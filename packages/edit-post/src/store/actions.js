@@ -8,7 +8,7 @@ import {
 	privateApis as editorPrivateApis,
 } from '@wordpress/editor';
 import deprecated from '@wordpress/deprecated';
-import { addAction } from '@wordpress/hooks';
+import { addFilter } from '@wordpress/hooks';
 import { store as coreStore } from '@wordpress/core-data';
 
 /**
@@ -478,14 +478,21 @@ export const initializeMetaBoxes =
 		metaBoxesInitialized = true;
 
 		// Save metaboxes on save completion, except for autosaves.
-		addAction(
-			'editor.savePost',
+		addFilter(
+			'editor.__unstableSavePost',
 			'core/edit-post/save-metaboxes',
-			async ( options ) => {
-				if ( ! options.isAutosave && select.hasMetaBoxes() ) {
-					await dispatch.requestMetaBoxUpdates();
-				}
-			}
+			( previous, options ) =>
+				previous.then( () => {
+					if ( options.isAutosave ) {
+						return;
+					}
+
+					if ( ! select.hasMetaBoxes() ) {
+						return;
+					}
+
+					return dispatch.requestMetaBoxUpdates();
+				} )
 		);
 
 		dispatch( {

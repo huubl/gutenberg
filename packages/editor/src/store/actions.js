@@ -12,11 +12,7 @@ import {
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import {
-	applyFilters,
-	applyFiltersAsync,
-	doActionAsync,
-} from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { __ } from '@wordpress/i18n';
 
@@ -188,7 +184,7 @@ export const savePost =
 		}
 
 		const previousRecord = select.getCurrentPost();
-		let edits = {
+		const edits = {
 			id: previousRecord.id,
 			...registry
 				.select( coreStore )
@@ -203,9 +199,9 @@ export const savePost =
 
 		let error = false;
 		try {
-			edits = await applyFiltersAsync(
-				'editor.preSavePost',
-				edits,
+			error = await applyFilters(
+				'editor.__unstablePreSavePost',
+				Promise.resolve( false ),
 				options
 			);
 		} catch ( err ) {
@@ -240,25 +236,14 @@ export const savePost =
 				);
 		}
 
-		// Run the hook with legacy unstable name for backward compatibility
 		if ( ! error ) {
-			try {
-				await applyFilters(
-					'editor.__unstableSavePost',
-					Promise.resolve(),
-					options
-				);
-			} catch ( err ) {
+			await applyFilters(
+				'editor.__unstableSavePost',
+				Promise.resolve(),
+				options
+			).catch( ( err ) => {
 				error = err;
-			}
-		}
-
-		if ( ! error ) {
-			try {
-				await doActionAsync( 'editor.savePost', options );
-			} catch ( err ) {
-				error = err;
-			}
+			} );
 		}
 		dispatch( { type: 'REQUEST_POST_UPDATE_FINISH', options } );
 
