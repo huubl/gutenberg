@@ -32,7 +32,7 @@ import {
 	InnerBlocks,
 } from '@wordpress/block-editor';
 import { privateApis as patternsPrivateApis } from '@wordpress/patterns';
-import { getBlockBindingsSource } from '@wordpress/blocks';
+import { store as blocksStore } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -196,6 +196,7 @@ function ReusableBlockEdit( {
 		( select ) => {
 			const { getBlocks, getSettings, getBlockEditingMode } =
 				select( blockEditorStore );
+			const { getBlockBindingsSource } = unlock( select( blocksStore ) );
 			// For editing link to the site editor if the theme and user permissions support it.
 			return {
 				innerBlocks: getBlocks( patternClientId ),

@@ -1,4 +1,10 @@
-const { registerBlockBindingsSource } = wp.blocks;
+const { unlock } =
+	wp.privateApis.__dangerousOptInToUnstableAPIsOnlyForCoreModules(
+		'I acknowledge private features are not for use in themes or plugins and doing so will break in the next version of WordPress.',
+		'@wordpress/blocks'
+	);
+
+const { registerBlockBindingsSource } = unlock( wp.blocks.privateApis );
 const { fieldsList } = window.testingBindings || {};
 
 const getValues = ( { bindings } ) => {

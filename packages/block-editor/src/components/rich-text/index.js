@@ -20,7 +20,7 @@ import {
 	removeFormat,
 } from '@wordpress/rich-text';
 import { Popover } from '@wordpress/components';
-import { getBlockBindingsSource } from '@wordpress/blocks';
+import { store as blocksStore } from '@wordpress/blocks';
 import deprecated from '@wordpress/deprecated';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -39,6 +39,7 @@ import FormatEdit from './format-edit';
 import { getAllowedFormats } from './utils';
 import { Content, valueToHTMLString } from './content';
 import { withDeprecations } from './with-deprecations';
+import { unlock } from '../../lock-unlock';
 import { canBindBlock } from '../../hooks/use-bindings-attributes';
 import BlockContext from '../block-context';
 
@@ -174,6 +175,7 @@ export function RichTextWrapper(
 			}
 
 			const relatedBinding = blockBindings[ identifier ];
+			const { getBlockBindingsSource } = unlock( select( blocksStore ) );
 			const blockBindingsSource = getBlockBindingsSource(
 				relatedBinding.source
 			);

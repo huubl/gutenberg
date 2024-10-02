@@ -2,10 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	getBlockBindingsSource,
-	getBlockBindingsSources,
-} from '@wordpress/blocks';
+import { privateApis as blocksPrivateApis } from '@wordpress/blocks';
 import {
 	__experimentalItemGroup as ItemGroup,
 	__experimentalItem as Item,
@@ -50,6 +47,7 @@ const useToolsPanelDropdownMenuProps = () => {
 };
 
 function BlockBindingsPanelDropdown( { fieldsList, attribute, binding } ) {
+	const { getBlockBindingsSources } = unlock( blocksPrivateApis );
 	const registeredSources = getBlockBindingsSources();
 	const { updateBlockBindings } = useBlockBindingsUtils();
 	const currentKey = binding?.args?.key;
@@ -98,7 +96,8 @@ function BlockBindingsPanelDropdown( { fieldsList, attribute, binding } ) {
 
 function BlockBindingsAttribute( { attribute, binding, fieldsList } ) {
 	const { source: sourceName, args } = binding || {};
-	const sourceProps = getBlockBindingsSource( sourceName );
+	const sourceProps =
+		unlock( blocksPrivateApis ).getBlockBindingsSource( sourceName );
 	const isSourceInvalid = ! sourceProps;
 	return (
 		<VStack className="block-editor-bindings__item" spacing={ 0 }>
@@ -201,6 +200,7 @@ export const BlockBindingsPanel = ( { name: blockName, metadata } ) => {
 			if ( ! bindableAttributes || bindableAttributes.length === 0 ) {
 				return EMPTY_OBJECT;
 			}
+			const { getBlockBindingsSources } = unlock( blocksPrivateApis );
 			const registeredSources = getBlockBindingsSources();
 			Object.entries( registeredSources ).forEach(
 				( [ sourceName, { getFieldsList, usesContext } ] ) => {
