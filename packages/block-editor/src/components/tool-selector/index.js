@@ -44,7 +44,8 @@ function ToolSelector( props, ref ) {
 		<Dropdown
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<Button
-					size="compact"
+					// TODO: Switch to `true` (40px size) if possible
+					__next40pxDefaultSize={ false }
 					{ ...props }
 					ref={ ref }
 					icon={ mode === 'navigation' ? editIcon : selectIcon }
