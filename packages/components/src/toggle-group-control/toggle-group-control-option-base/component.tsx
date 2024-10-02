@@ -3,12 +3,13 @@
  */
 import type { ForwardedRef } from 'react';
 import * as Ariakit from '@ariakit/react';
+import { motion } from 'framer-motion';
 
 /**
  * WordPress dependencies
  */
-import { useInstanceId } from '@wordpress/compose';
-import { useLayoutEffect, useMemo, useRef } from '@wordpress/element';
+import { useReducedMotion, useInstanceId } from '@wordpress/compose';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,6 +26,12 @@ import { useCx } from '../../utils/hooks';
 import Tooltip from '../../tooltip';
 
 const { ButtonContentView, LabelView } = styles;
+
+const REDUCED_MOTION_TRANSITION_CONFIG = {
+	duration: 0,
+};
+
+const LAYOUT_ID = 'toggle-group-backdrop-shared-layout-id';
 
 const WithToolTip = ( { showTooltip, text, children }: WithToolTipProps ) => {
 	if ( showTooltip && text ) {
@@ -51,6 +58,7 @@ function ToggleGroupControlOptionBase(
 	>,
 	forwardedRef: ForwardedRef< any >
 ) {
+	const shouldReduceMotion = useReducedMotion();
 	const toggleGroupControlContext = useToggleGroupControlContext();
 
 	const id = useInstanceId(
@@ -99,6 +107,7 @@ function ToggleGroupControlOptionBase(
 			),
 		[ cx, isDeselectable, isIcon, isPressed, size, className ]
 	);
+	const backdropClasses = useMemo( () => cx( styles.backdropView ), [ cx ] );
 
 	const buttonOnClick = () => {
 		if ( isDeselectable && isPressed ) {
@@ -115,15 +124,8 @@ function ToggleGroupControlOptionBase(
 		ref: forwardedRef,
 	};
 
-	const labelRef = useRef< HTMLDivElement | null >( null );
-	useLayoutEffect( () => {
-		if ( isPressed && labelRef.current ) {
-			toggleGroupControlContext.setSelectedElement( labelRef.current );
-		}
-	}, [ isPressed, toggleGroupControlContext ] );
-
 	return (
-		<LabelView ref={ labelRef } className={ labelViewClasses }>
+		<LabelView className={ labelViewClasses }>
 			<WithToolTip
 				showTooltip={ showTooltip }
 				text={ otherButtonProps[ 'aria-label' ] }
@@ -161,6 +163,21 @@ function ToggleGroupControlOptionBase(
 					</Ariakit.Radio>
 				) }
 			</WithToolTip>
+			{ /* Animated backdrop using framer motion's shared layout animation */ }
+			{ isPressed ? (
+				<motion.div layout layoutRoot>
+					<motion.div
+						className={ backdropClasses }
+						transition={
+							shouldReduceMotion
+								? REDUCED_MOTION_TRANSITION_CONFIG
+								: undefined
+						}
+						role="presentation"
+						layoutId={ LAYOUT_ID }
+					/>
+				</motion.div>
+			) : null }
 		</LabelView>
 	);
 }
