@@ -18,19 +18,12 @@ export type Border = {
 
 export type ColorProps = Pick<
 	ColorPaletteProps,
-	'colors' | '__experimentalIsRenderedInSidebar'
+	'colors' | 'enableAlpha' | '__experimentalIsRenderedInSidebar'
 > & {
 	/**
 	 * This toggles the ability to choose custom colors.
 	 */
 	disableCustomColors?: boolean;
-	/**
-	 * This controls whether the alpha channel will be offered when selecting
-	 * custom colors.
-	 *
-	 * @default true
-	 */
-	enableAlpha?: boolean;
 };
 
 export type LabelProps = {
@@ -85,8 +78,9 @@ export type BorderControlProps = ColorProps &
 		 */
 		shouldSanitizeBorder?: boolean;
 		/**
-		 * @deprecated This prop no longer has any effect.
-		 * @ignore
+		 * Whether or not to show the header for the border color and style
+		 * picker dropdown. The header includes a label for the color picker
+		 * and a close button.
 		 */
 		showDropdownHeader?: boolean;
 		/**
@@ -145,8 +139,9 @@ export type DropdownProps = ColorProps &
 		 */
 		previousStyleSelection?: string;
 		/**
-		 * @deprecated This prop no longer has any effect.
-		 * @ignore
+		 * Whether or not to render a header for the border color and style picker
+		 * dropdown. The header includes a label for the color picker and a
+		 * close button.
 		 */
 		showDropdownHeader?: boolean;
 	};
