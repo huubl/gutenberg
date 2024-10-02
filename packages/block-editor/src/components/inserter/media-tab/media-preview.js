@@ -133,8 +133,7 @@ export function MediaPreview( { media, onClick, category } ) {
 	);
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( noticesStore );
-	const { getSettings, getBlock } = useSelect( blockEditorStore );
-	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+	const { getSettings } = useSelect( blockEditorStore );
 
 	const onMediaInsert = useCallback(
 		( previewBlock ) => {
@@ -181,31 +180,18 @@ export function MediaPreview( { media, onClick, category } ) {
 							if ( isBlobURL( img.url ) ) {
 								return;
 							}
-
-							if ( ! getBlock( clonedBlock.clientId ) ) {
-								// Ensure the block is only inserted once.
-								onClick( {
-									...clonedBlock,
-									attributes: {
-										...clonedBlock.attributes,
-										id: img.id,
-										url: img.url,
-									},
-								} );
-
-								createSuccessNotice(
-									__( 'Image uploaded and inserted.' ),
-									{ type: 'snackbar', id: 'inserter-notice' }
-								);
-							} else {
-								// For subsequent calls, update the existing block.
-								updateBlockAttributes( clonedBlock.clientId, {
+							onClick( {
+								...clonedBlock,
+								attributes: {
 									...clonedBlock.attributes,
 									id: img.id,
 									url: img.url,
-								} );
-							}
-
+								},
+							} );
+							createSuccessNotice(
+								__( 'Image uploaded and inserted.' ),
+								{ type: 'snackbar', id: 'inserter-notice' }
+							);
 							setIsInserting( false );
 						},
 						allowedTypes: ALLOWED_MEDIA_TYPES,
@@ -228,9 +214,7 @@ export function MediaPreview( { media, onClick, category } ) {
 			getSettings,
 			onClick,
 			createSuccessNotice,
-			updateBlockAttributes,
 			createErrorNotice,
-			getBlock,
 		]
 	);
 
