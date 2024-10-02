@@ -72,6 +72,7 @@ function ScreenRevisions() {
 	);
 
 	const onCloseRevisions = () => {
+		goTo( '/' ); // Return to global styles main panel.
 		const canvasContainerView =
 			editorCanvasContainerView === 'global-styles-revisions:style-book'
 				? 'style-book'
