@@ -15,8 +15,8 @@ import { unlock } from '../lock-unlock';
  * If the value is not available based on context, like in templates,
  * it falls back to the default value, label, or key.
  *
- * @param {Object} select  The select function from the data store.
- * @param {Object} context The context provided.
+ * @param {Object} registry The registry context exposed through `useRegistry`.
+ * @param {Object} context  The context provided.
  * @return {Object} List of post meta fields with their value and label.
  *
  * @example
@@ -34,9 +34,11 @@ import { unlock } from '../lock-unlock';
  * }
  * ```
  */
-function getPostMetaFields( select, context ) {
-	const { getEditedEntityRecord } = select( coreDataStore );
-	const { getRegisteredPostMeta } = unlock( select( coreDataStore ) );
+function getPostMetaFields( registry, context ) {
+	const { getEditedEntityRecord } = registry.select( coreDataStore );
+	const { getRegisteredPostMeta } = unlock(
+		registry.select( coreDataStore )
+	);
 
 	let entityMetaValues;
 	// Try to get the current entity meta values.
@@ -73,8 +75,8 @@ function getPostMetaFields( select, context ) {
 
 export default {
 	name: 'core/post-meta',
-	getValues( { select, context, bindings } ) {
-		const metaFields = getPostMetaFields( select, context );
+	getValues( { registry, context, bindings } ) {
+		const metaFields = getPostMetaFields( registry, context );
 
 		const newValues = {};
 		for ( const [ attributeName, source ] of Object.entries( bindings ) ) {
@@ -86,61 +88,61 @@ export default {
 		}
 		return newValues;
 	},
-	setValues( { dispatch, context, bindings } ) {
+	setValues( { registry, context, bindings } ) {
 		const newMeta = {};
 		Object.values( bindings ).forEach( ( { args, newValue } ) => {
 			newMeta[ args.key ] = newValue;
 		} );
-
-		dispatch( coreDataStore ).editEntityRecord(
-			'postType',
-			context?.postType,
-			context?.postId,
-			{
+		registry
+			.dispatch( coreDataStore )
+			.editEntityRecord( 'postType', context?.postType, context?.postId, {
 				meta: newMeta,
-			}
-		);
+			} );
 	},
-	canUserEditValue( { select, context, args } ) {
+	canUserEditValue( { registry, context, args } ) {
 		// Lock editing in query loop.
 		if ( context?.query || context?.queryId ) {
 			return false;
 		}
 
 		const postType =
-			context?.postType || select( editorStore ).getCurrentPostType();
+			context?.postType ||
+			registry.select( editorStore ).getCurrentPostType();
 
 		// Check that editing is happening in the post editor and not a template.
 		if ( postType === 'wp_template' ) {
 			return false;
 		}
 
-		const fieldValue = getPostMetaFields( select, context )?.[ args.key ]
+		const fieldValue = getPostMetaFields( registry, context )?.[ args.key ]
 			?.value;
 		// Empty string or `false` could be a valid value, so we need to check if the field value is undefined.
 		if ( fieldValue === undefined ) {
 			return false;
 		}
 		// Check that custom fields metabox is not enabled.
-		const areCustomFieldsEnabled =
-			select( editorStore ).getEditorSettings().enableCustomFields;
+		const areCustomFieldsEnabled = registry
+			.select( editorStore )
+			.getEditorSettings().enableCustomFields;
 		if ( areCustomFieldsEnabled ) {
 			return false;
 		}
 
 		// Check that the user has the capability to edit post meta.
-		const canUserEdit = select( coreDataStore ).canUser( 'update', {
-			kind: 'postType',
-			name: context?.postType,
-			id: context?.postId,
-		} );
+		const canUserEdit = registry
+			.select( coreDataStore )
+			.canUser( 'update', {
+				kind: 'postType',
+				name: context?.postType,
+				id: context?.postId,
+			} );
 		if ( ! canUserEdit ) {
 			return false;
 		}
 
 		return true;
 	},
-	getFieldsList( { select, context } ) {
-		return getPostMetaFields( select, context );
+	getFieldsList( { registry, context } ) {
+		return getPostMetaFields( registry, context );
 	},
 };

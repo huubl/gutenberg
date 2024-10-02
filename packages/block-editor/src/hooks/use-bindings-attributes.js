@@ -118,81 +118,79 @@ export const withBlockBindingSupport = createHigherOrderComponent(
 		// there are attribute updates.
 		// `source.getValues` may also call a selector via `registry.select`.
 		const updatedContext = {};
-		const boundAttributes = useSelect(
-			( select ) => {
-				if ( ! blockBindings ) {
-					return;
+		const boundAttributes = useSelect( () => {
+			if ( ! blockBindings ) {
+				return;
+			}
+
+			const attributes = {};
+
+			const blockBindingsBySource = new Map();
+
+			for ( const [ attributeName, binding ] of Object.entries(
+				blockBindings
+			) ) {
+				const { source: sourceName, args: sourceArgs } = binding;
+				const source = sources[ sourceName ];
+				if ( ! source || ! canBindAttribute( name, attributeName ) ) {
+					continue;
 				}
 
-				const attributes = {};
-
-				const blockBindingsBySource = new Map();
-
-				for ( const [ attributeName, binding ] of Object.entries(
-					blockBindings
-				) ) {
-					const { source: sourceName, args: sourceArgs } = binding;
-					const source = sources[ sourceName ];
-					if (
-						! source ||
-						! canBindAttribute( name, attributeName )
-					) {
-						continue;
-					}
-
-					// Populate context.
-					for ( const key of source.usesContext || [] ) {
-						updatedContext[ key ] = blockContext[ key ];
-					}
-
-					blockBindingsBySource.set( source, {
-						...blockBindingsBySource.get( source ),
-						[ attributeName ]: {
-							args: sourceArgs,
-						},
-					} );
+				// Populate context.
+				for ( const key of source.usesContext || [] ) {
+					updatedContext[ key ] = blockContext[ key ];
 				}
 
-				if ( blockBindingsBySource.size ) {
-					for ( const [
-						source,
-						bindings,
-					] of blockBindingsBySource ) {
-						// Get values in batch if the source supports it.
-						let values = {};
-						if ( ! source.getValues ) {
-							Object.keys( bindings ).forEach( ( attr ) => {
-								// Default to the the source label when `getValues` doesn't exist.
-								values[ attr ] = source.label;
-							} );
+				blockBindingsBySource.set( source, {
+					...blockBindingsBySource.get( source ),
+					[ attributeName ]: {
+						args: sourceArgs,
+					},
+				} );
+			}
+
+			if ( blockBindingsBySource.size ) {
+				for ( const [ source, bindings ] of blockBindingsBySource ) {
+					// Get values in batch if the source supports it.
+					let values = {};
+					if ( ! source.getValues ) {
+						Object.keys( bindings ).forEach( ( attr ) => {
+							// Default to the the source label when `getValues` doesn't exist.
+							values[ attr ] = source.label;
+						} );
+					} else {
+						values = source.getValues( {
+							registry,
+							context: updatedContext,
+							clientId,
+							bindings,
+						} );
+					}
+					for ( const [ attributeName, value ] of Object.entries(
+						values
+					) ) {
+						if (
+							attributeName === 'url' &&
+							( ! value || ! isURLLike( value ) )
+						) {
+							// Return null if value is not a valid URL.
+							attributes[ attributeName ] = null;
 						} else {
-							values = source.getValues( {
-								select,
-								context: updatedContext,
-								clientId,
-								bindings,
-							} );
-						}
-						for ( const [ attributeName, value ] of Object.entries(
-							values
-						) ) {
-							if (
-								attributeName === 'url' &&
-								( ! value || ! isURLLike( value ) )
-							) {
-								// Return null if value is not a valid URL.
-								attributes[ attributeName ] = null;
-							} else {
-								attributes[ attributeName ] = value;
-							}
+							attributes[ attributeName ] = value;
 						}
 					}
 				}
+			}
 
-				return attributes;
-			},
-			[ blockBindings, name, clientId, updatedContext, sources ]
-		);
+			return attributes;
+		}, [
+			blockBindings,
+			name,
+			clientId,
+			updatedContext,
+			registry,
+			sources,
+		] );
 
 		const hasParentPattern = !! updatedContext[ 'pattern/overrides' ];
 		const hasPatternOverridesDefaultBinding =
@@ -242,8 +240,7 @@ export const withBlockBindingSupport = createHigherOrderComponent(
 							bindings,
 						] of blockBindingsBySource ) {
 							source.setValues( {
-								select: registry.select,
-								dispatch: registry.dispatch,
+								registry,
 								context: updatedContext,
 								clientId,
 								bindings,

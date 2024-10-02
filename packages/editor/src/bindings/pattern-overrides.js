@@ -7,9 +7,9 @@ const CONTENT = 'content';
 
 export default {
 	name: 'core/pattern-overrides',
-	getValues( { select, clientId, context, bindings } ) {
+	getValues( { registry, clientId, context, bindings } ) {
 		const patternOverridesContent = context[ 'pattern/overrides' ];
-		const { getBlockAttributes } = select( blockEditorStore );
+		const { getBlockAttributes } = registry.select( blockEditorStore );
 		const currentBlockAttributes = getBlockAttributes( clientId );
 
 		const overridesValues = {};
@@ -32,9 +32,9 @@ export default {
 		}
 		return overridesValues;
 	},
-	setValues( { select, dispatch, clientId, bindings } ) {
+	setValues( { registry, clientId, bindings } ) {
 		const { getBlockAttributes, getBlockParentsByBlockName, getBlocks } =
-			select( blockEditorStore );
+			registry.select( blockEditorStore );
 		const currentBlockAttributes = getBlockAttributes( clientId );
 		const blockName = currentBlockAttributes?.metadata?.name;
 		if ( ! blockName ) {
@@ -61,10 +61,12 @@ export default {
 			const syncBlocksWithSameName = ( blocks ) => {
 				for ( const block of blocks ) {
 					if ( block.attributes?.metadata?.name === blockName ) {
-						dispatch( blockEditorStore ).updateBlockAttributes(
-							block.clientId,
-							attributes
-						);
+						registry
+							.dispatch( blockEditorStore )
+							.updateBlockAttributes(
+								block.clientId,
+								attributes
+							);
 					}
 					syncBlocksWithSameName( block.innerBlocks );
 				}
@@ -75,26 +77,27 @@ export default {
 		}
 		const currentBindingValue =
 			getBlockAttributes( patternClientId )?.[ CONTENT ];
-
-		dispatch( blockEditorStore ).updateBlockAttributes( patternClientId, {
-			[ CONTENT ]: {
-				...currentBindingValue,
-				[ blockName ]: {
-					...currentBindingValue?.[ blockName ],
-					...Object.entries( attributes ).reduce(
-						( acc, [ key, value ] ) => {
-							// TODO: We need a way to represent `undefined` in the serialized overrides.
-							// Also see: https://github.com/WordPress/gutenberg/pull/57249#discussion_r1452987871
-							// We use an empty string to represent undefined for now until
-							// we support a richer format for overrides and the block bindings API.
-							acc[ key ] = value === undefined ? '' : value;
-							return acc;
-						},
-						{}
-					),
+		registry
+			.dispatch( blockEditorStore )
+			.updateBlockAttributes( patternClientId, {
+				[ CONTENT ]: {
+					...currentBindingValue,
+					[ blockName ]: {
+						...currentBindingValue?.[ blockName ],
+						...Object.entries( attributes ).reduce(
+							( acc, [ key, value ] ) => {
+								// TODO: We need a way to represent `undefined` in the serialized overrides.
+								// Also see: https://github.com/WordPress/gutenberg/pull/57249#discussion_r1452987871
+								// We use an empty string to represent undefined for now until
+								// we support a richer format for overrides and the block bindings API.
+								acc[ key ] = value === undefined ? '' : value;
+								return acc;
+							},
+							{}
+						),
+					},
 				},
-			},
-		} );
+			} );
 	},
 	canUserEditValue: () => true,
 };
