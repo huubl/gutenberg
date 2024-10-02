@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { Navigator as InternalNavigator } from './navigator/component';
+import { Navigator as InternalNavigator } from './navigator-provider/component';
 import { NavigatorScreen as InternalNavigatorScreen } from './navigator-screen/component';
 import { NavigatorButton as InternalNavigatorButton } from './navigator-button/component';
 import { NavigatorBackButton as InternalNavigatorBackButton } from './navigator-back-button/component';
@@ -10,8 +10,9 @@ export { useNavigator } from './use-navigator';
 
 /**
  * The `NavigatorProvider` component allows rendering nested views/panels/menus
- * (via the `NavigatorScreen` component and navigate between them
- * (via the `NavigatorButton` and `NavigatorBackButton` components).
+ * (via the `NavigatorScreen` component and navigate between these different
+ * view (via the `NavigatorButton` and `NavigatorBackButton` components or the
+ * `useNavigator` hook).
  *
  * ```jsx
  * import {
@@ -47,7 +48,8 @@ export const NavigatorProvider = Object.assign( InternalNavigator, {
 /**
  * The `NavigatorScreen` component represents a single view/screen/panel and
  * should be used in combination with the `NavigatorProvider`, the
- * `NavigatorButton` and the `NavigatorBackButton` components.
+ * `NavigatorButton` and the `NavigatorBackButton` components (or the `useNavigator`
+ * hook).
  *
  * @example
  * ```jsx
@@ -84,7 +86,7 @@ export const NavigatorScreen = Object.assign( InternalNavigatorScreen, {
 /**
  * The `NavigatorButton` component can be used to navigate to a screen and should
  * be used in combination with the `NavigatorProvider`, the `NavigatorScreen`
- * and the `NavigatorBackButton` components.
+ * and the `NavigatorBackButton` components (or the `useNavigator` hook).
  *
  * @example
  * ```jsx
@@ -121,7 +123,8 @@ export const NavigatorButton = Object.assign( InternalNavigatorButton, {
 /**
  * The `NavigatorBackButton` component can be used to navigate to a screen and
  * should be used in combination with the `NavigatorProvider`, the
- * `NavigatorScreen` and the `NavigatorButton` components.
+ * `NavigatorScreen` and the `NavigatorButton` components (or the `useNavigator`
+ * hook).
  *
  * @example
  * ```jsx

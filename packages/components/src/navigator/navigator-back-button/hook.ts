@@ -20,7 +20,7 @@ export function useNavigatorBackButton(
 		as = Button,
 
 		...otherProps
-	} = useContextSystem( props, 'Navigator.BackButton' );
+	} = useContextSystem( props, 'NavigatorBackButton' );
 
 	const { goBack } = useNavigator();
 	const handleClick: React.MouseEventHandler< HTMLButtonElement > =

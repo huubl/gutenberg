@@ -8,20 +8,20 @@ import type { Meta, StoryObj } from '@storybook/react';
  */
 import Button from '../../button';
 import { VStack } from '../../v-stack';
+import {
+	NavigatorProvider,
+	NavigatorScreen,
+	NavigatorButton,
+	NavigatorBackButton,
+	useNavigator,
+} from '../legacy';
 import { HStack } from '../../h-stack';
-import { Navigator, useNavigator } from '../';
 
-const meta: Meta< typeof Navigator > = {
-	component: Navigator,
-	subcomponents: {
-		// @ts-expect-error - See https://github.com/storybookjs/storybook/issues/23170
-		Screen: Navigator.Screen,
-		// @ts-expect-error - See https://github.com/storybookjs/storybook/issues/23170
-		Button: Navigator.Button,
-		// @ts-expect-error - See https://github.com/storybookjs/storybook/issues/23170
-		BackButton: Navigator.BackButton,
-	},
-	title: 'Components/Navigator',
+const meta: Meta< typeof NavigatorProvider > = {
+	component: NavigatorProvider,
+	// @ts-expect-error - See https://github.com/storybookjs/storybook/issues/23170
+	subcomponents: { NavigatorScreen, NavigatorButton, NavigatorBackButton },
+	title: 'Components (Experimental)/Navigator',
 	argTypes: {
 		as: { control: { type: null } },
 		children: { control: { type: null } },
@@ -40,10 +40,10 @@ const meta: Meta< typeof Navigator > = {
 						 * detail of the Navigator component. Do not use outside of
 						 * its source code.
 						 */
-						[data-wp-component="Navigator"] {
+						[data-wp-component="NavigatorProvider"] {
 							height: 250px;
 						}
-						[data-wp-component="Navigator.Screen"] {
+						[data-wp-component="NavigatorScreen"]:not([data-sticky]) {
 							padding: 8px;
 						}
 					` }</style>
@@ -55,55 +55,55 @@ const meta: Meta< typeof Navigator > = {
 };
 export default meta;
 
-export const Default: StoryObj< typeof Navigator > = {
+export const Default: StoryObj< typeof NavigatorProvider > = {
 	args: {
 		initialPath: '/',
 		children: (
 			<>
-				<Navigator.Screen path="/">
+				<NavigatorScreen path="/">
 					<h2>This is the home screen.</h2>
 
 					<VStack alignment="left">
-						<Navigator.Button variant="primary" path="/child">
+						<NavigatorButton variant="primary" path="/child">
 							Go to child screen.
-						</Navigator.Button>
+						</NavigatorButton>
 
-						<Navigator.Button variant="primary" path="/product/1">
+						<NavigatorButton variant="primary" path="/product/1">
 							Go to dynamic path screen with id 1.
-						</Navigator.Button>
+						</NavigatorButton>
 
-						<Navigator.Button variant="primary" path="/product/2">
+						<NavigatorButton variant="primary" path="/product/2">
 							Go to dynamic path screen with id 2.
-						</Navigator.Button>
+						</NavigatorButton>
 					</VStack>
-				</Navigator.Screen>
+				</NavigatorScreen>
 
-				<Navigator.Screen path="/child">
+				<NavigatorScreen path="/child">
 					<h2>This is the child screen.</h2>
 					<HStack spacing={ 2 } alignment="left">
-						<Navigator.BackButton variant="secondary">
+						<NavigatorBackButton variant="secondary">
 							Go back
-						</Navigator.BackButton>
+						</NavigatorBackButton>
 
-						<Navigator.Button
+						<NavigatorButton
 							variant="primary"
 							path="/child/grandchild"
 						>
 							Go to grand child screen.
-						</Navigator.Button>
+						</NavigatorButton>
 					</HStack>
-				</Navigator.Screen>
+				</NavigatorScreen>
 
-				<Navigator.Screen path="/child/grandchild">
+				<NavigatorScreen path="/child/grandchild">
 					<h2>This is the grand child screen.</h2>
-					<Navigator.BackButton variant="secondary">
+					<NavigatorBackButton variant="secondary">
 						Go back
-					</Navigator.BackButton>
-				</Navigator.Screen>
+					</NavigatorBackButton>
+				</NavigatorScreen>
 
-				<Navigator.Screen path="/product/:id">
+				<NavigatorScreen path="/product/:id">
 					<DynamicScreen />
-				</Navigator.Screen>
+				</NavigatorScreen>
 			</>
 		),
 	},
@@ -119,14 +119,14 @@ function DynamicScreen() {
 				This screen can parse params dynamically. The current id is:{ ' ' }
 				{ params.id }
 			</p>
-			<Navigator.BackButton variant="secondary">
+			<NavigatorBackButton variant="secondary">
 				Go back
-			</Navigator.BackButton>
+			</NavigatorBackButton>
 		</>
 	);
 }
 
-export const WithNestedInitialPath: StoryObj< typeof Navigator > = {
+export const WithNestedInitialPath: StoryObj< typeof NavigatorProvider > = {
 	...Default,
 	args: {
 		...Default.args,
@@ -138,7 +138,7 @@ const NavigatorButtonWithSkipFocus = ( {
 	path,
 	onClick,
 	...props
-}: React.ComponentProps< typeof Navigator.Button > ) => {
+}: React.ComponentProps< typeof NavigatorButton > ) => {
 	const { goTo } = useNavigator();
 
 	return (
@@ -156,7 +156,7 @@ const NavigatorButtonWithSkipFocus = ( {
 	);
 };
 
-export const SkipFocus: StoryObj< typeof Navigator > = {
+export const SkipFocus: StoryObj< typeof NavigatorProvider > = {
 	args: {
 		initialPath: '/',
 		children: (
@@ -170,19 +170,19 @@ export const SkipFocus: StoryObj< typeof Navigator > = {
 						display: 'contents',
 					} }
 				>
-					<Navigator.Screen path="/">
+					<NavigatorScreen path="/">
 						<h2>Home screen</h2>
-						<Navigator.Button variant="primary" path="/child">
+						<NavigatorButton variant="primary" path="/child">
 							Go to child screen.
-						</Navigator.Button>
-					</Navigator.Screen>
+						</NavigatorButton>
+					</NavigatorScreen>
 
-					<Navigator.Screen path="/child">
+					<NavigatorScreen path="/child">
 						<h2>Child screen</h2>
-						<Navigator.BackButton variant="secondary">
+						<NavigatorBackButton variant="secondary">
 							Go back to home screen
-						</Navigator.BackButton>
-					</Navigator.Screen>
+						</NavigatorBackButton>
+					</NavigatorScreen>
 				</div>
 
 				<NavigatorButtonWithSkipFocus path="/child">
