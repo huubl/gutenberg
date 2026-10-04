@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug Fixes
+
+-   Load new script modules during client-side navigation without `eval()` or WebAssembly, so the Content Security Policy doesn't need `'unsafe-eval'` or `'wasm-unsafe-eval'`. ([#84056](https://github.com/WordPress/gutenberg/pull/84056))
+
 ## 2.56.0 (2026-09-23)
 
 ## 2.55.0 (2026-09-10)
