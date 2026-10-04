@@ -15,7 +15,6 @@ export default function addIntroText() {
 	introText.className = 'a11y-speak-intro-text';
 	introText.textContent = __( 'Notifications' );
 
-<<<<<<< HEAD
 	Object.assign( introText.style, {
 		position: 'absolute',
 		margin: '-1px',
@@ -28,24 +27,9 @@ export default function addIntroText() {
 		clipPath: 'inset(50%)',
 		border: '0',
 		wordWrap: 'normal',
+		wordBreak: 'normal',
 	} );
-	introText.setAttribute( 'hidden', 'hidden' );
-=======
-	introText.setAttribute(
-		'style',
-		'position:absolute;' +
-			'margin:-1px;' +
-			'padding:0;' +
-			'height:1px;' +
-			'width:1px;' +
-			'overflow:hidden;' +
-			'clip-path:inset(50%);' +
-			'border:0;' +
-			'word-wrap:normal !important;' +
-			'word-break:normal !important;'
-	);
 	introText.setAttribute( 'hidden', '' );
->>>>>>> origin/trunk
 
 	const { body } = document;
 	if ( body ) {
