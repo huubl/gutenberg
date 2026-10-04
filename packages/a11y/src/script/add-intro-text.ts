@@ -1,6 +1,3 @@
-/**
- * WordPress dependencies
- */
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -9,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * This text is initially hidden from assistive technologies by using a `hidden`
  * HTML attribute which is then removed once a message fills the aria-live regions.
  *
- * @return {HTMLParagraphElement} The explanatory text HTML element.
+ * @return The explanatory text HTML element.
  */
 export default function addIntroText() {
 	const introText = document.createElement( 'p' );
@@ -25,13 +22,12 @@ export default function addIntroText() {
 		height: '1px',
 		width: '1px',
 		overflow: 'hidden',
-		clip: 'rect(1px, 1px, 1px, 1px)',
-		webkitClipPath: 'inset(50%)',
 		clipPath: 'inset(50%)',
 		border: '0',
 		wordWrap: 'normal',
+		wordBreak: 'normal',
 	} );
-	introText.setAttribute( 'hidden', 'hidden' );
+	introText.setAttribute( 'hidden', '' );
 
 	const { body } = document;
 	if ( body ) {

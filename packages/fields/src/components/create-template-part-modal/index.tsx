@@ -1,21 +1,14 @@
-/**
- * WordPress dependencies
- */
 import {
-	Icon,
+	Icon as WCIcon,
 	BaseControl,
 	TextControl,
-	Flex,
-	FlexItem,
-	FlexBlock,
 	Button,
 	Modal,
-	__experimentalRadioGroup as RadioGroup,
-	__experimentalRadio as Radio,
 	__experimentalHStack as HStack,
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
+import type { TemplatePartArea } from '@wordpress/core-data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
@@ -25,20 +18,23 @@ import {
 	footer as footerIcon,
 	header as headerIcon,
 	sidebar as sidebarIcon,
+	navigationOverlay as navigationOverlayIcon,
 	symbolFilled as symbolFilledIcon,
 } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
-// @ts-expect-error serialize is not typed
 import { serialize } from '@wordpress/blocks';
-
-/**
- * Internal dependencies
- */
 import {
 	getCleanTemplatePartSlug,
 	getUniqueTemplatePartTitle,
 	useExistingTemplateParts,
 } from './utils';
+
+function getAreaRadioId( value: string, instanceId: number ) {
+	return `fields-create-template-part-modal__area-option-${ value }-${ instanceId }`;
+}
+function getAreaRadioDescriptionId( value: string, instanceId: number ) {
+	return `fields-create-template-part-modal__area-option-description-${ value }-${ instanceId }`;
+}
 
 type CreateTemplatePartModalContentsProps = {
 	defaultArea?: string;
@@ -50,28 +46,20 @@ type CreateTemplatePartModalContentsProps = {
 	defaultTitle?: string;
 };
 
-type TemplatePartArea = {
-	area: string;
-	label: string;
-	icon: string;
-	description: string;
-};
-
 /**
  * A React component that renders a modal for creating a template part. The modal displays a title and the contents for creating the template part.
  * This component should not live in this package, it should be moved to a dedicated package responsible for managing template.
- * @param {Object} props            The component props.
- * @param          props.modalTitle
+ * @param props            The component props.
+ * @param props.modalTitle
  */
 export default function CreateTemplatePartModal( {
 	modalTitle,
 	...restProps
 }: {
-	modalTitle: string;
+	modalTitle?: string;
 } & CreateTemplatePartModalContentsProps ) {
 	const defaultModalTitle = useSelect(
 		( select ) =>
-			// @ts-expect-error getPostType is not typed with 'wp_template_part' as argument.
 			select( coreStore ).getPostType( 'wp_template_part' )?.labels
 				?.add_new_item,
 		[]
@@ -89,13 +77,22 @@ export default function CreateTemplatePartModal( {
 	);
 }
 
-const getTemplatePartIcon = ( iconName: string ) => {
-	if ( 'header' === iconName ) {
+/**
+ * Helper function to retrieve the corresponding icon by area name.
+ *
+ * @param {string} areaOrIconName The area name (e.g., 'header', 'navigation-overlay').
+ *
+ * @return {Object} The corresponding icon.
+ */
+const getTemplatePartIcon = ( areaOrIconName: string ) => {
+	if ( 'header' === areaOrIconName ) {
 		return headerIcon;
-	} else if ( 'footer' === iconName ) {
+	} else if ( 'footer' === areaOrIconName ) {
 		return footerIcon;
-	} else if ( 'sidebar' === iconName ) {
+	} else if ( 'sidebar' === areaOrIconName ) {
 		return sidebarIcon;
+	} else if ( 'navigation-overlay' === areaOrIconName ) {
+		return navigationOverlayIcon;
 	}
 	return symbolFilledIcon;
 };
@@ -133,10 +130,7 @@ export function CreateTemplatePartModalContents( {
 
 	const defaultTemplatePartAreas = useSelect(
 		( select ) =>
-			// @ts-expect-error getEntityRecord is not typed with unstableBase as argument.
-			select( coreStore ).getEntityRecord< {
-				default_template_part_areas: Array< TemplatePartArea >;
-			} >( 'root', '__unstableBase' )?.default_template_part_areas,
+			select( coreStore ).getCurrentTheme()?.default_template_part_areas,
 		[]
 	);
 
@@ -176,7 +170,7 @@ export function CreateTemplatePartModalContents( {
 					? error.message
 					: __(
 							'An error occurred while creating the template part.'
-					  );
+						);
 
 			createErrorNotice( errorMessage, { type: 'snackbar' } );
 
@@ -194,59 +188,73 @@ export function CreateTemplatePartModalContents( {
 		>
 			<VStack spacing="4">
 				<TextControl
-					__next40pxDefaultSize
-					__nextHasNoMarginBottom
 					label={ __( 'Name' ) }
 					value={ title }
 					onChange={ setTitle }
 					required
 				/>
-				<BaseControl
-					__nextHasNoMarginBottom
-					label={ __( 'Area' ) }
-					id={ `fields-create-template-part-modal__area-selection-${ instanceId }` }
-					className="fields-create-template-part-modal__area-base-control"
-				>
-					<RadioGroup
-						label={ __( 'Area' ) }
-						className="fields-create-template-part-modal__area-radio-group"
-						id={ `fields-create-template-part-modal__area-selection-${ instanceId }` }
-						onChange={ ( value ) =>
-							value && typeof value === 'string'
-								? setArea( value )
-								: () => void 0
-						}
-						checked={ area }
-					>
-						{ ( defaultTemplatePartAreas ?? [] ).map( ( item ) => {
-							const icon = getTemplatePartIcon( item.icon );
-							return (
-								<Radio
-									__next40pxDefaultSize
-									key={ item.label }
-									value={ item.area }
-									className="fields-create-template-part-modal__area-radio"
-								>
-									<Flex align="start" justify="start">
-										<FlexItem>
-											<Icon icon={ icon } />
-										</FlexItem>
-										<FlexBlock className="fields-create-template-part-modal__option-label">
-											{ item.label }
-											<div>{ item.description }</div>
-										</FlexBlock>
-
-										<FlexItem className="fields-create-template-part-modal__checkbox">
-											{ area === item.area && (
-												<Icon icon={ check } />
+				<fieldset className="fields-create-template-part-modal__area-fieldset">
+					<BaseControl.VisualLabel as="legend">
+						{ __( 'Area' ) }
+					</BaseControl.VisualLabel>
+					<div className="fields-create-template-part-modal__area-radio-group">
+						{ ( defaultTemplatePartAreas ?? [] ).map(
+							( item: TemplatePartArea ) => {
+								const icon = getTemplatePartIcon( item.icon );
+								return (
+									<div
+										key={ item.area }
+										className="fields-create-template-part-modal__area-radio-wrapper"
+									>
+										<input
+											type="radio"
+											id={ getAreaRadioId(
+												item.area,
+												instanceId
 											) }
-										</FlexItem>
-									</Flex>
-								</Radio>
-							);
-						} ) }
-					</RadioGroup>
-				</BaseControl>
+											name={ `fields-create-template-part-modal__area-${ instanceId }` }
+											value={ item.area }
+											checked={ area === item.area }
+											onChange={ () => {
+												setArea( item.area );
+											} }
+											aria-describedby={ getAreaRadioDescriptionId(
+												item.area,
+												instanceId
+											) }
+										/>
+										<WCIcon
+											icon={ icon }
+											className="fields-create-template-part-modal__area-radio-icon"
+										/>
+										<label
+											htmlFor={ getAreaRadioId(
+												item.area,
+												instanceId
+											) }
+											className="fields-create-template-part-modal__area-radio-label"
+										>
+											{ item.label }
+										</label>
+										<WCIcon
+											icon={ check }
+											className="fields-create-template-part-modal__area-radio-checkmark"
+										/>
+										<p
+											className="fields-create-template-part-modal__area-radio-description"
+											id={ getAreaRadioDescriptionId(
+												item.area,
+												instanceId
+											) }
+										>
+											{ item.description }
+										</p>
+									</div>
+								);
+							}
+						) }
+					</div>
+				</fieldset>
 				<HStack justify="right">
 					<Button
 						__next40pxDefaultSize
