@@ -1,6 +1,3 @@
-/**
- * WordPress dependencies
- */
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -9,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * This text is initially hidden from assistive technologies by using a `hidden`
  * HTML attribute which is then removed once a message fills the aria-live regions.
  *
- * @return {HTMLParagraphElement} The explanatory text HTML element.
+ * @return The explanatory text HTML element.
  */
 export default function addIntroText() {
 	const introText = document.createElement( 'p' );
@@ -18,6 +15,7 @@ export default function addIntroText() {
 	introText.className = 'a11y-speak-intro-text';
 	introText.textContent = __( 'Notifications' );
 
+<<<<<<< HEAD
 	Object.assign( introText.style, {
 		position: 'absolute',
 		margin: '-1px',
@@ -32,6 +30,22 @@ export default function addIntroText() {
 		wordWrap: 'normal',
 	} );
 	introText.setAttribute( 'hidden', 'hidden' );
+=======
+	introText.setAttribute(
+		'style',
+		'position:absolute;' +
+			'margin:-1px;' +
+			'padding:0;' +
+			'height:1px;' +
+			'width:1px;' +
+			'overflow:hidden;' +
+			'clip-path:inset(50%);' +
+			'border:0;' +
+			'word-wrap:normal !important;' +
+			'word-break:normal !important;'
+	);
+	introText.setAttribute( 'hidden', '' );
+>>>>>>> origin/trunk
 
 	const { body } = document;
 	if ( body ) {

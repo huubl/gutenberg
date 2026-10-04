@@ -1,24 +1,13 @@
-/**
- * External dependencies
- */
 import type { ReactElement, ReactNode, Key } from 'react';
-
-/**
- * WordPress dependencies
- */
+import { useObservableValue } from '@wordpress/compose';
 import {
 	useContext,
-	useEffect,
-	useReducer,
+	useLayoutEffect,
 	useRef,
 	Children,
 	cloneElement,
 	isEmptyElement,
 } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
 import SlotFillContext from './context';
 import type { SlotComponentProps } from './types';
 
@@ -32,41 +21,48 @@ function isFunction( maybeFunc: any ): maybeFunc is Function {
 	return typeof maybeFunc === 'function';
 }
 
-function Slot( props: Omit< SlotComponentProps, 'bubblesVirtually' > ) {
-	const registry = useContext( SlotFillContext );
-	const [ , rerender ] = useReducer( () => [], [] );
-	const ref = useRef( { rerender } );
+function addKeysToChildren( children: ReactNode ) {
+	return Children.map( children, ( child, childIndex ) => {
+		if ( ! child || typeof child === 'string' ) {
+			return child;
+		}
+		let childKey: Key = childIndex;
+		if ( typeof child === 'object' && 'key' in child && child?.key ) {
+			childKey = child.key;
+		}
 
+		return cloneElement( child as ReactElement, {
+			key: childKey,
+		} );
+	} );
+}
+
+function Slot( props: Omit< SlotComponentProps, 'bubblesVirtually' > ) {
 	const { name, children, fillProps = {} } = props;
 
-	useEffect( () => {
-		const refValue = ref.current;
-		registry.registerSlot( name, refValue );
-		return () => registry.unregisterSlot( name, refValue );
+	const registry = useContext( SlotFillContext );
+	const instanceRef = useRef( {} );
+
+	useLayoutEffect( () => {
+		const instance = instanceRef.current;
+		registry.registerSlot( name, { type: 'children', instance } );
+		return () => registry.unregisterSlot( name, instance );
 	}, [ registry, name ] );
 
-	const fills: ReactNode[] = ( registry.getFills( name, ref.current ) ?? [] )
+	let fills = useObservableValue( registry.fills, name ) ?? [];
+	const currentSlot = useObservableValue( registry.slots, name );
+
+	// Fills should only be rendered in the currently registered instance of the slot.
+	if ( ! currentSlot || currentSlot.instance !== instanceRef.current ) {
+		fills = [];
+	}
+
+	const renderedFills = fills
 		.map( ( fill ) => {
 			const fillChildren = isFunction( fill.children )
 				? fill.children( fillProps )
 				: fill.children;
-			return Children.map( fillChildren, ( child, childIndex ) => {
-				if ( ! child || typeof child === 'string' ) {
-					return child;
-				}
-				let childKey: Key = childIndex;
-				if (
-					typeof child === 'object' &&
-					'key' in child &&
-					child?.key
-				) {
-					childKey = child.key;
-				}
-
-				return cloneElement( child as ReactElement, {
-					key: childKey,
-				} );
-			} );
+			return addKeysToChildren( fillChildren );
 		} )
 		.filter(
 			// In some cases fills are rendered only when some conditions apply.
@@ -75,7 +71,13 @@ function Slot( props: Omit< SlotComponentProps, 'bubblesVirtually' > ) {
 			( element ) => ! isEmptyElement( element )
 		);
 
-	return <>{ isFunction( children ) ? children( fills ) : fills }</>;
+	return (
+		<>
+			{ isFunction( children )
+				? children( renderedFills )
+				: renderedFills }
+		</>
+	);
 }
 
 export default Slot;
